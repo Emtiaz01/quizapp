@@ -13,80 +13,108 @@ import { ApiService } from '../services/api'; // Ensure this path is correct
 })
 export class HomeComponent {
   // --- Component State Properties ---
-  
-  // This property holds the video link from the input field
   singleVideoLink: string = '';
+  selectedFile: File | null = null;
+  selectedFileName: string | null = null;
   
-  // These properties manage the UI during the API call
   isLoading: boolean = false;
   errorMessage: string | null = null;
   
-  // These properties are for managing different views within the component (optional)
   isStarted: boolean = true;
-  selectedOption: 'single' | null = 'single';
+  selectedOption: 'single' | 'pdf' = 'single';
 
-  /**
-   * The constructor injects the necessary services:
-   * - ApiService: To communicate with the backend.
-   * - Router: To navigate to another page after the API call.
-   */
   constructor(
     private apiService: ApiService,
     private router: Router
   ) {}
 
-  /**
-   * This is the primary function called when the user clicks the "Submit" button.
-   */
-  submitLink(): void {
-    // 1. Validate the user's input to ensure it's not empty.
+  // --- Main Submit Handler ---
+  submit(): void {
+    if (this.selectedOption === 'single') {
+      this.submitLink();
+    } else if (this.selectedOption === 'pdf') {
+      this.submitPdf();
+    }
+  }
+
+  // --- Video Submission Logic ---
+  private submitLink(): void {
     if (!this.singleVideoLink || !this.singleVideoLink.trim()) {
       this.errorMessage = "Please enter a valid video link.";
       return;
     }
 
-    // 2. Set the loading state to provide feedback to the user.
     this.isLoading = true;
     this.errorMessage = null;
-
-    // 3. Log the action for debugging purposes.
     console.log("Sending URL to backend:", this.singleVideoLink);
 
-    // 4. Call the generateQuiz method from the ApiService.
-    this.apiService.generateQuiz(this.singleVideoLink.trim()).subscribe({
-      // The 'next' block runs if the API call is successful
+    this.apiService.generateQuizFromVideo(this.singleVideoLink.trim()).subscribe({
       next: (response) => {
-        this.isLoading = false; // Turn off loading indicator
+        this.isLoading = false;
         console.log('Quiz generated successfully!', response);
-        
-        // 5. Navigate to the quiz results page.
-        // The 'state' object carries the quiz data to the next component.
         this.router.navigate(['/quizzes/single-video'], { state: { quiz: response } });
       },
-      // The 'error' block runs if the API call fails
       error: (err) => {
-        this.isLoading = false; // Turn off loading indicator
-        // Display a user-friendly error message.
+        this.isLoading = false;
         this.errorMessage = `Error: ${err.error?.error || 'Failed to generate quiz.'}`;
         console.error('An error occurred:', err);
       }
     });
   }
 
-  // --- Optional helper methods for more complex UI ---
+  // --- PDF Submission Logic ---
+  private submitPdf(): void {
+    if (!this.selectedFile) {
+      this.errorMessage = "Please select a PDF file.";
+      return;
+    }
+   
+    this.isLoading = true;
+    this.errorMessage = null;
 
-  /**
-   * Example function to go back to a previous view state.
-   */
-  goBack(): void {
-    this.isStarted = false;
-    this.selectedOption = null;
+    const formData = new FormData();
+    formData.append('file', this.selectedFile, this.selectedFile.name);
+
+    console.log("Uploading PDF to backend:", this.selectedFile.name);
+    this.apiService.generateQuizFromPdf(formData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        console.log('PDF Quiz generated successfully!', response);
+        // Navigate to the new PDF quiz results page
+        this.router.navigate(['/quizzes/pdf'], { state: { quiz: response } });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = `Error: ${err.error?.error || 'Failed to generate quiz from PDF.'}`;
+        console.error('An error occurred:', err);
+      }
+    });
   }
   
-  /**
-   * Example function to handle option selection if you have multiple options.
-   */
-  selectOption(option: 'single'): void {
+  // --- UI Helper Methods ---
+  goBack(): void {
+    this.isStarted = false;
+    this.selectedOption = 'single';
+  }
+
+  selectOption(option: 'single' | 'pdf'): void {
     this.selectedOption = option;
+    this.errorMessage = null; // Clear errors when switching
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      if (file.type === "application/pdf") {
+        this.selectedFile = file;
+        this.selectedFileName = file.name;
+        this.errorMessage = null;
+      } else {
+        this.errorMessage = "Invalid file type. Please upload a PDF.";
+        this.selectedFile = null;
+        this.selectedFileName = null;
+      }
+    }
   }
 }

@@ -16,13 +16,31 @@
         <!-- Main Title and Description -->
         <h1>Auto Quiz Generator</h1>
         <p class="description">
-          Enter a video link below to automatically generate an interactive quiz.
+          Generate an interactive quiz from a video link or a PDF document.
         </p>
 
+        <!-- ADD: Option Toggle Buttons -->
+        <div class="option-toggle">
+          <button 
+            type="button" 
+            class="btn" 
+            [class.active]="selectedOption === 'single'" 
+            (click)="selectOption('single')" 
+            [disabled]="isLoading">
+            <i class="fas fa-link"></i> Video Link
+          </button>
+          <button 
+            type="button" 
+            class="btn" 
+            [class.active]="selectedOption === 'pdf'" 
+            (click)="selectOption('pdf')" 
+            [disabled]="isLoading">
+            <i class="fas fa-file-pdf"></i> Upload PDF
+          </button>
+        </div>
+
         <!-- Input Form -->
-        <!-- We can use a <form> tag for better semantics. The (ngSubmit) event
-             calls the same submitLink() function when the form is submitted. -->
-        <form (ngSubmit)="submitLink()">
+        <form (ngSubmit)="submit()">
 
           <!-- Input Box for the Single Video Link -->
           <div *ngIf="selectedOption === 'single'" class="input-box">
@@ -37,10 +55,21 @@
             />
           </div>
 
+          <!-- ADD: Input Box for PDF File Upload -->
+          <div *ngIf="selectedOption === 'pdf'" class="input-box">
+            <label for="pdfFile"><i class="fas fa-file-pdf"></i> Select PDF File:</label>
+            <input
+              id="pdfFile"
+              type="file"
+              accept=".pdf"
+              (change)="onFileSelected($event)"
+              [disabled]="isLoading"
+            />
+            <small *ngIf="selectedFileName">{{ selectedFileName }}</small>
+          </div>
+
           <!-- Submit Button -->
-          <!-- The button is disabled during the API call to prevent multiple submissions. -->
           <button type="submit" class="btn submit-btn" [disabled]="isLoading">
-            <!-- The content inside the button changes based on the loading state -->
             <span *ngIf="!isLoading">
               <i class="fas fa-paper-plane"></i> Generate Quiz
             </span>
@@ -51,7 +80,6 @@
         </form>
 
         <!-- Error Message Display -->
-        <!-- This container will only be shown if there is an error message. -->
         <div *ngIf="errorMessage" class="error-message">
           <p>{{ errorMessage }}</p>
         </div>
