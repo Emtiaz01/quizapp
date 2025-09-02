@@ -4,77 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interactive Quiz Generator</title>
+  <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="home.css">
 </head>
 <body>
   <div class="home-container">
-
-    <!-- Initial "Get Started" Card View -->
-    <div class="card-container" *ngIf="!isStarted">
-      <div class="card description-card">
-        <h1>Intelligent Quiz Generator</h1>
-        <p>
-          This platform transforms video links and PDF documents into interactive quizzes, making learning more engaging and effective.
-        </p>
-        <p>
-          📹 <strong>Single Video:</strong> Create a focused quiz.<br>
-          🎞 <strong>Multiple Videos:</strong> Generate combined questions.<br>
-          📄 <strong>PDF Document:</strong> Turn your text into a test.
-        </p>
-        <button class="btn get-started-btn" (click)="start()">
-          Get Started <i class="fas fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Upload Card View -->
-    <div class="card-container" *ngIf="isStarted">
+    <div class="card-container">
       <div class="card">
-        <!-- Back Button -->
-        <button class="back-btn" (click)="goBack()">
-          <i class="fas fa-arrow-left"></i> Back
-        </button>
+        
+        <!-- Main Title and Description -->
+        <h1>Auto Quiz Generator</h1>
+        <p class="description">
+          Enter a video link below to automatically generate an interactive quiz.
+        </p>
 
-        <h2>Choose an Option</h2>
-        <button class="btn" (click)="selectOption('single')">
-          <i class="fas fa-video"></i>
-          Upload Single Video Link
-        </button>
-        <button class="btn" (click)="selectOption('multiple')">
-          <i class="fas fa-clone"></i>
-          Upload Multiple Video Links
-        </button>
-        <button class="btn" (click)="selectOption('pdf')">
-          <i class="fas fa-file-pdf"></i>
-          Upload PDF
-        </button>
+        <!-- Input Form -->
+        <!-- We can use a <form> tag for better semantics. The (ngSubmit) event
+             calls the same submitLink() function when the form is submitted. -->
+        <form (ngSubmit)="submitLink()">
 
-        <!-- Input Boxes (same as before) -->
-        <div *ngIf="selectedOption === 'single'" class="input-box">
-          <label><i class="fas fa-link"></i> Enter Video Link:</label>
-          <input type="text" [(ngModel)]="singleVideoLink" placeholder="https://example.com/video" />
-          <button class="btn submit-btn" (click)="submitLink()">
-            <i class="fas fa-paper-plane"></i> Submit
+          <!-- Input Box for the Single Video Link -->
+          <div *ngIf="selectedOption === 'single'" class="input-box">
+            <label for="videoLink"><i class="fas fa-link"></i> Enter Video Link:</label>
+            <input
+              id="videoLink"
+              type="text"
+              [(ngModel)]="singleVideoLink"
+              name="singleVideoLink"
+              placeholder="e.g., https://www.youtube.com/watch?v=..."
+              [disabled]="isLoading"
+            />
+          </div>
+
+          <!-- Submit Button -->
+          <!-- The button is disabled during the API call to prevent multiple submissions. -->
+          <button type="submit" class="btn submit-btn" [disabled]="isLoading">
+            <!-- The content inside the button changes based on the loading state -->
+            <span *ngIf="!isLoading">
+              <i class="fas fa-paper-plane"></i> Generate Quiz
+            </span>
+            <span *ngIf="isLoading">
+              <i class="fas fa-spinner fa-spin"></i> Generating...
+            </span>
           </button>
+        </form>
+
+        <!-- Error Message Display -->
+        <!-- This container will only be shown if there is an error message. -->
+        <div *ngIf="errorMessage" class="error-message">
+          <p>{{ errorMessage }}</p>
         </div>
-        <div *ngIf="selectedOption === 'multiple'" class="input-box">
-          <label><i class="fas fa-list"></i> Enter Multiple Video Links:</label>
-          <textarea [(ngModel)]="multipleVideoLinks" placeholder="https://v1.com, https://v2.com"></textarea>
-          <button class="btn submit-btn" (click)="submitLink()">
-            <i class="fas fa-paper-plane"></i> Submit
-          </button>
-        </div>
-        <div *ngIf="selectedOption === 'pdf'" class="input-box">
-          <label><i class="fas fa-file-pdf"></i> Enter PDF Link:</label>
-          <input type="text" [(ngModel)]="pdfLink" placeholder="https://example.com/file.pdf" />
-          <button class="btn submit-btn" (click)="submitLink()">
-            <i class="fas fa-paper-plane"></i> Submit
-          </button>
-        </div>
+
       </div>
     </div>
-
   </div>
 </body>
 </html>
