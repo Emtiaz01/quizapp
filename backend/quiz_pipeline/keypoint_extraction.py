@@ -151,4 +151,6 @@ def extract_keypoints_improved(transcribed_text, num_key_points=20):
                     break
     
     print(f"-> Successfully extracted {len(final_key_points)} key points.")
+    for i in final_key_points:
+        print(f" keypoints- {i}")
     return final_key_points[:num_key_points]

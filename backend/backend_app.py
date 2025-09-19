@@ -15,12 +15,9 @@ from quiz_pipeline.os_video_handler import process_os_video_path
 from quiz_pipeline.keypoint_extraction import extract_keypoints_improved
  
 def is_local_path(path: str) -> bool:
-    # Clean quote marks and whitespace from input
     clean_path = path.strip().strip('\'"')
-    # Check if absolute path
     if os.path.isabs(clean_path) and os.path.exists(clean_path):
         return True
-    # Exclude common URL schemes
     parsed = urlparse(clean_path)
     if parsed.scheme in ('http', 'https', 'ftp', 'ftps'):
         return False
@@ -61,13 +58,13 @@ def handle_quiz_generation():
  
             if 'video_url' in data:
                 input_str = data['video_url']
-                # Split only on commas or newlines to avoid breaking paths with spaces
+                # split only on commas or newlines to avoid breaking paths with spaces
                 raw_items = re.split(r'[,\\n]+', input_str)
                 clean_items = [i.strip().strip('\'"') for i in raw_items if i.strip()]
  
                 app.logger.info(f"Received items: {clean_items}")
  
-                # If first item looks like local path, treat all as local paths
+                # if first item looks like local path, treat all as local paths
                 if clean_items and is_local_path(clean_items[0]):
                     results = []
                     for path in clean_items:
@@ -160,4 +157,3 @@ if __name__ == '__main__':
         logging.error("Application cannot start because the Whisper model failed to load.")
     else:
         app.run(debug=True, port=5000)
- 

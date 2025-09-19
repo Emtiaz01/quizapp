@@ -21,6 +21,11 @@
 .all-quizzes-btn-container {
   margin-top: 25px;
 }
+.all-quizzes-btn:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+  pointer-events:stroke;
+}
 
 .all-quizzes-btn {
   background: linear-gradient(135deg, #ffb347, #ffda6a);

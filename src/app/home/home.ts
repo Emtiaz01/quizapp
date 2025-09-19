@@ -221,7 +221,7 @@ export class HomeComponent implements OnInit {
     const trueFalse = quizData.filter(q => q.type === 'True/False');
 
     if(mcqs.length > 0) {
-      formattedText += 'Multiple Choice Questions\n\n';
+      // formattedText += 'Multiple Choice Questions\n\n';
       mcqs.forEach((question) => {
           formattedText += `${question.question}\n`;
           let correctOptionLetter = '';
@@ -239,7 +239,7 @@ export class HomeComponent implements OnInit {
     }
 
     if(trueFalse.length > 0) {
-      formattedText += '\n--- TRUE/FALSE ---\n\n';
+      // formattedText += '\n--- TRUE/FALSE ---\n\n';
       trueFalse.forEach((question) => {
           formattedText += `${question.question}\n`;
           formattedText += `A. True\nB. False\n`;
